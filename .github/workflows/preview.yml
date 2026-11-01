@@ -1,0 +1,39 @@
+# Plan morning-digest § 3–4: publish the digest preview to GitHub Pages.
+# The page is built here from the repo and deployed as a Pages artifact, so the HTML (and the
+# lane marker in its banner) never enters git (ADR 0003). The marker comes from the
+# LANE_MARKER repo secret; delete the secret and run this again to publish "no marker set"
+# over the same link.
+name: preview
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm preview /digest/2026-10-28 var/preview/index.html
+        env:
+          LANE_MARKER: ${{ secrets.LANE_MARKER }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: var/preview
+          retention-days: 1
+      - id: deployment
+        uses: actions/deploy-pages@v4
