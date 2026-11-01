@@ -18,7 +18,7 @@ export type Night = {
   badLines: number;
 };
 
+// The reader contract, implemented in ./read.ts:
+//   readNight(runsDir: string, night: string): Night | null
 // null means no file; otherwise rows are job-sorted (empty means no valid rows), and badLines counts parse failures.
-export function readNight(runsDir: string, night: string): Night | null {
-  throw new Error('not implemented');
-}
+export type ReadNight = (runsDir: string, night: string) => Night | null;
